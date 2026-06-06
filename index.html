@@ -724,17 +724,15 @@
   <p>Enter the guest's full name and title to generate their personal invitation link.</p>
   <label for="name-input">Guest Name & Title</label>
   <input type="text" id="name-input" placeholder="e.g. Hon. James Mukasa" autocomplete="off">
-  <button onclick="generateLink()">Generate Invitation Link</button>
+  <button id="gen-btn">Generate Invitation Link</button>
   <div id="link-output">
     <p>✓ Invitation link ready — share with your guest:</p>
     <div id="link-box">
       <div id="link-text"></div>
-      <button id="copy-btn" onclick="copyLink()">Copy</button>
+      <button id="copy-btn">Copy</button>
     </div>
   </div>
 </div>
-
-<!-- ── INVITE SCENE (shown when ?guest= param exists) ── -->
 <div id="invite-scene">
   <!-- Envelope -->
   <div class="envelope-wrap" id="env-wrap">
@@ -808,4 +806,185 @@
             <div class="rsvp-label">RSVP</div>
             <div class="rsvp-numbers">0744 604 003 · 0755 959 050</div>
           </div>
-          <div class="footer-line
+          <div class="footer-line"></div>
+          <div class="family-sig">
+            <div class="sig-name">The Kimbowa Family</div>
+            <div class="sig-label">With joy &amp; gratitude</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-bottom-band"></div>
+  </div>
+
+  <div class="back-link"><a href="?" onclick="return resetToGenerator()">← Generate another invitation</a></div>
+</div>
+
+<script>
+  const INVITE_TEXT = `cordially invite you to join them in celebrating the graduation and thanksgiving ceremony of their beloved son,\n\n<strong>Dr. Lutaaya Ezra</strong>\n\nupon his successful completion of the <em>Bachelor of Medicine and Surgery (MBChB)</em>.\n\nYour presence would be a great honour as we gather to give thanks to God and mark this momentous milestone in the life of our family.`;
+
+  function generateLink() {
+    const input = document.getElementById('name-input');
+    const name = input.value.trim();
+    if (!name) { input.focus(); return; }
+    const base = window.location.origin + window.location.pathname;
+    const link = base + '?guest=' + encodeURIComponent(name);
+    const linkText = document.getElementById('link-text');
+    const linkOutput = document.getElementById('link-output');
+    linkText.textContent = link;
+    linkOutput.style.display = 'block';
+    linkOutput.style.visibility = 'visible';
+    linkOutput.style.opacity = '1';
+    setTimeout(() => linkOutput.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+  }
+
+  function copyLink() {
+    const text = document.getElementById('link-text').textContent;
+    const btn = document.getElementById('copy-btn');
+    // Try modern clipboard API first, fall back to execCommand
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2500);
+      }).catch(() => fallbackCopy(text, btn));
+    } else {
+      fallbackCopy(text, btn);
+    }
+  }
+
+  function fallbackCopy(text, btn) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      btn.textContent = 'Copied!';
+    } catch(e) {
+      btn.textContent = 'Select & copy manually';
+    }
+    document.body.removeChild(ta);
+    setTimeout(() => btn.textContent = 'Copy', 2500);
+  }
+
+  function resetToGenerator() {
+    window.location.href = window.location.href.split('?')[0];
+    return false;
+  }
+
+  // ── On load: check for ?guest= param ──
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('gen-btn').addEventListener('click', generateLink);
+    document.getElementById('copy-btn').addEventListener('click', copyLink);
+    document.getElementById('name-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') generateLink();
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const guest = params.get('guest');
+    if (guest) {
+      document.getElementById('generator').style.display = 'none';
+      document.getElementById('invite-scene').style.display = 'block';
+      document.getElementById('guest-display').textContent = guest;
+    }
+  });
+
+  // ── Envelope open ──
+  function openEnvelope() {
+    const env = document.getElementById('envelope');
+    if (env.classList.contains('open')) return;
+    env.classList.add('open');
+    document.getElementById('tap-hint').style.opacity = '0';
+
+    // After flap opens, slide card in
+    setTimeout(() => {
+      const card = document.getElementById('card-reveal');
+      card.style.display = 'block';
+      // Scroll envelope up smoothly
+      document.getElementById('env-wrap').style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+      document.getElementById('env-wrap').style.transform = 'translateY(-20px)';
+      document.getElementById('env-wrap').style.opacity = '0.4';
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          card.classList.add('visible');
+          // Start typewriter after card visible
+          setTimeout(() => typewriteBody(), 600);
+        });
+      });
+    }, 950);
+  }
+
+  // ── Typewriter ──
+  function typewriteBody() {
+    const el = document.getElementById('invite-body');
+    // We need to type out HTML-aware text
+    const rawSegments = [
+      { text: 'cordially invite you to join them in celebrating the graduation and thanksgiving ceremony of their beloved son,\n\n', type: 'plain' },
+      { text: 'Dr. Lutaaya Ezra', type: 'bold' },
+      { text: '\n\nupon his successful completion of the ', type: 'plain' },
+      { text: 'Bachelor of Medicine and Surgery (MBChB)', type: 'em' },
+      { text: '.\n\nYour presence would be a great honour as we gather to give thanks to God and mark this momentous milestone in the life of our family.', type: 'plain' },
+    ];
+
+    el.innerHTML = '';
+    // Build a flat char array with type tags
+    const chars = [];
+    for (const seg of rawSegments) {
+      for (const ch of seg.text) {
+        chars.push({ ch, type: seg.type });
+      }
+    }
+
+    let i = 0;
+    // Track open tags
+    let currentType = null;
+    let currentEl = null;
+
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    el.appendChild(cursor);
+
+    function type() {
+      if (i >= chars.length) {
+        cursor.remove();
+        return;
+      }
+      const { ch, type } = chars[i];
+
+      // Close current tag if type changes
+      if (type !== currentType) {
+        currentType = type;
+        if (type === 'bold') {
+          currentEl = document.createElement('strong');
+        } else if (type === 'em') {
+          currentEl = document.createElement('em');
+        } else {
+          currentEl = document.createElement('span');
+        }
+        el.insertBefore(currentEl, cursor);
+      }
+
+      if (ch === '\n') {
+        currentEl.appendChild(document.createElement('br'));
+        // Force new span after br
+        currentType = null;
+        currentEl = null;
+      } else {
+        currentEl.appendChild(document.createTextNode(ch));
+      }
+
+      i++;
+      // Vary speed slightly for realism
+      const delay = ch === ' ' ? 28 : ch === '\n' ? 120 : (Math.random() < 0.05 ? 80 : 22);
+      setTimeout(type, delay);
+    }
+
+    type();
+  }
+</script>
+</body>
+</html>
