@@ -56,9 +56,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
   width:90%;max-width:500px;
   padding:2rem 0 3rem;
   position:relative;z-index:1;
-  animation:genFadeUp 0.8s ease forwards;
+  animation:genFadeUp 1s cubic-bezier(.4,0,.2,1) forwards;
 }
-@keyframes genFadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes genFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* header */
 .gen-header{text-align:center;margin-bottom:2rem;}
@@ -133,9 +133,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
   display:none;margin-top:1.3rem;
   background:#f0f8f8;border:1px solid rgba(10,74,78,0.18);
   border-radius:2px;padding:1.1rem;
-  animation:fadeIn 0.4s ease forwards;
+  animation:fadeIn 0.6s cubic-bezier(.4,0,.2,1) forwards;
 }
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .result-box.show{display:block;}
 .result-guest{
   font-family:'Cormorant Garamond',serif;
@@ -202,7 +202,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
   background:var(--teal);color:var(--cream);
   font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;
   padding:0.6rem 1.4rem;border-top:2px solid var(--amber);
-  display:none;z-index:999;animation:toastUp 0.3s ease;
+  display:none;z-index:999;animation:toastUp 0.5s cubic-bezier(.4,0,.2,1);
   white-space:nowrap;
 }
 @keyframes toastUp{from{opacity:0;bottom:0.5rem}to{opacity:1;bottom:1.5rem}}
@@ -289,10 +289,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
   margin-top:24px;
   font-family:'Cinzel',serif;font-size:15px;font-weight:600;
   letter-spacing:0.32em;text-transform:uppercase;
-  color:rgb(255,196,0);animation:pulse-hint 2.2s ease-in-out infinite;
+  color:rgb(255,196,0);animation:pulse-hint 2s ease-in-out infinite;
   transition:opacity 0.4s;
 }
-@keyframes pulse-hint{0%,100%{opacity:0.4}50%{opacity:0.9}}
+@keyframes pulse-hint{0%,100%{opacity:0.35}50%{opacity:1}}
 
 /* ════════════════════════════
    FULL CARD
@@ -507,8 +507,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
 }
 .cd-over{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--amber-light);text-align:center;padding:10px;}
 
-@keyframes float-in{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-#invite-scene.show{animation:float-in 0.7s ease forwards;}
+@keyframes float-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#invite-scene.show{animation:float-in 1s cubic-bezier(.4,0,.2,1) forwards;}
+@keyframes typeWriter{from{width:0}to{width:100%}}
+.typewriter{overflow:hidden;border-right:3px solid var(--amber);white-space:nowrap;animation:typeWriter 2s steps(40,end) 0.5s both;display:inline-block;}
+@keyframes envPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 24px 60px rgba(0,0,0,0.55))}50%{transform:scale(1.05);filter:drop-shadow(0 30px 90px rgba(200,135,42,0.4))}}
+.envelope{animation:envPulse 3s ease-in-out infinite !important;}
 </style>
 </head>
 <body>
@@ -565,6 +569,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
 <div id="invite-scene">
   <img src="flower.webp" alt="" style="position:absolute;top:-7px;right:-10px;width:clamp(90px,18vw,160px);rotate:180deg;opacity:0.7;pointer-events:none;z-index:5;">
   <img src="flower.webp" alt="" style="position:absolute;bottom:-7px;left:-10px;width:clamp(70px,14vw,130px);opacity:0.45;pointer-events:none;z-index:5;">
+  <div style="text-align:center;margin-bottom:2rem;animation:genFadeUp 1s cubic-bezier(.4,0,.2,1) forwards;">
+    <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.4rem;font-weight:500;color:rgba(248,244,238,0.6);letter-spacing:0.08em;margin-bottom:0.3rem;">A personal invitation for</p>
+    <p id="guest-name-display" class="typewriter" style="font-family:'Cinzel',serif;font-size:2rem;font-weight:600;color:var(--amber);letter-spacing:0.05em;"></p>
+  </div>
   <div class="envelope-wrap">
     <div class="envelope" id="envelope" onclick="openEnvelope()">
       <div class="env-body">
@@ -682,6 +690,7 @@ if (guestParam) {
   document.getElementById('invite-scene').style.display = 'flex';
   const guestName = decodeURIComponent(guestParam);
   document.getElementById('guest-display').textContent = guestName;
+  document.getElementById('guest-name-display').textContent = guestName;
 
   // Setup confirmation button
   setTimeout(() => {
