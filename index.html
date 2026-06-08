@@ -765,7 +765,7 @@ html, body {
       <p>✓ Invitation link ready — share with your guest:</p>
       <div id="link-box">
         <div id="link-text"></div>
-        <button id="copy-btn">Copy</button>
+        <button id="copy-btn">Share Link</button>
       </div>
     </div>
   </div>
@@ -929,11 +929,31 @@ function generateLink() {
 
 document.getElementById('copy-btn').addEventListener('click', () => {
   const text = document.getElementById('link-text').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-  });
+  const btn = document.getElementById('copy-btn');
+  const shareData = {
+    title: 'Graduation Invitation',
+    text: 'You are invited to Dr. Lutaaya Ezra\'s graduation celebration.',
+    url: text
+  };
+
+  if (navigator.share) {
+    navigator.share(shareData).catch(() => {});
+    return;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Share Link', 2000);
+    }).catch(() => {
+      const whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(shareData.text + ' ' + text);
+      window.open(whatsappUrl, '_blank');
+    });
+    return;
+  }
+
+  const whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(shareData.text + ' ' + text);
+  window.open(whatsappUrl, '_blank');
 });
 
 // ── ENVELOPE OPEN ──
