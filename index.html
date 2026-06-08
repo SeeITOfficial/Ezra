@@ -52,6 +52,17 @@ html, body {
   border-top: 4px solid var(--amber);
 }
 
+.top-right-flower {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  width: clamp(100px, 29vw, 200px);
+  height: auto;
+  z-index: 150;
+  rotate: 180deg;
+  pointer-events: none;
+}
+
 .gen-logo {
   display: flex;
   align-items: center;
@@ -716,6 +727,10 @@ html, body {
 </head>
 <body>
 
+<img class="top-right-flower" src="flower.png" alt="Flower decoration">
+
+
+  
 <!-- ═══════ GENERATOR ═══════ -->
 <div id="generator">
   <div class="gen-card">
