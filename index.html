@@ -513,6 +513,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
 .typewriter{overflow:hidden;border-right:3px solid var(--amber);white-space:nowrap;animation:typeWriter 2s steps(40,end) 0.5s both;display:inline-block;}
 @keyframes envPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 24px 60px rgba(0,0,0,0.55))}50%{transform:scale(1.05);filter:drop-shadow(0 30px 90px rgba(200,135,42,0.4))}}
 .envelope{animation:envPulse 3s ease-in-out infinite !important;}
+@keyframes btnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.confirm-btn{animation:btnPulse 2s ease-in-out infinite;}
+@keyframes confetti-fall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+.confetti{position:fixed;pointer-events:none;font-size:24px;animation:confetti-fall 3s ease-in forwards;}
 </style>
 </head>
 <body>
@@ -625,6 +629,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
       <div class="honour-line">We would be honoured by your presence.</div>
     </div>
 
+    <div class="zone-confirm">
+      <button class="confirm-btn" id="confirm-btn">I WILL BE THERE</button>
+    </div>
+
     <div class="zone-details">
       <div class="rule-subtle"></div>
       <div class="details-row">
@@ -670,9 +678,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
       </div>
     </div>
 
-    <div class="zone-confirm">
-      <button class="confirm-btn" id="confirm-btn">I WILL BE THERE</button>
-    </div>
   </div>
 </div>
 
@@ -710,6 +715,7 @@ if (guestParam) {
           localStorage.setItem('ezra_grad_history', JSON.stringify(guests));
           confirmBtn.textContent = '✓ ATTENDANCE CONFIRMED';
           confirmBtn.disabled = true;
+          throwConfetti();
         }
       });
     }
@@ -857,6 +863,27 @@ function openEnvelope() {
   }
   tick(); setInterval(tick, 1000);
 })();
+
+// ── CONFETTI ──
+function throwConfetti() {
+  const colors = ['🎉', '🎊', '✨', '🌟', '💫', '🎈', '🎁'];
+  const confettiCount = 50;
+
+  for (let i = 0; i < confettiCount; i++) {
+    setTimeout(() => {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.textContent = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.left = Math.random() * 100 + '%';
+      confetti.style.top = '-20px';
+      confetti.style.animation = `confetti-fall ${2.5 + Math.random() * 1}s ease-in forwards`;
+      confetti.style.opacity = '1';
+      document.body.appendChild(confetti);
+
+      setTimeout(() => confetti.remove(), 3500);
+    }, i * 30);
+  }
+}
 </script>
 </body>
 </html>
