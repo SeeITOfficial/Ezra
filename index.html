@@ -575,7 +575,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
   <img src="flower.webp" alt="" style="position:absolute;bottom:-7px;left:-10px;width:clamp(70px,14vw,130px);opacity:0.45;pointer-events:none;z-index:5;">
   <div style="text-align:center;margin-bottom:2rem;animation:genFadeUp 1s cubic-bezier(.4,0,.2,1) forwards;">
     <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.4rem;font-weight:500;color:rgba(248,244,238,0.6);letter-spacing:0.08em;margin-bottom:0.3rem;">A personal invitation for</p>
-    <p id="guest-name-display" class="typewriter" style="font-family:'Cinzel',serif;font-size:2rem;font-weight:600;color:var(--amber);letter-spacing:0.05em;"></p>
+    <p id="guest-name-display" class="typewriter" style="font-family:'Cinzel',serif;font-size:2rem;font-weight:600;color:var(--amber);letter-spacing:0.05em;white-space:normal;overflow-wrap:normal;word-break:normal;text-align:center;"></p>
   </div>
   <div class="envelope-wrap">
     <div class="envelope" id="envelope" onclick="openEnvelope()">
@@ -630,7 +630,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--teal);}
     </div>
 
     <div class="zone-confirm">
-      <button class="confirm-btn" id="confirm-btn">I WILL BE THERE</button>
+      <button class="confirm-btn" id="confirm-btn">CLICK TO CONFIRM YOUR PRESENCE</button>
     </div>
 
     <div class="zone-details">
@@ -701,9 +701,14 @@ if (guestParam) {
   setTimeout(() => {
     const confirmBtn = document.getElementById('confirm-btn');
     if (confirmBtn) {
-      const guests = JSON.parse(localStorage.getItem('ezra_grad_history') || '[]');
-      const currentGuest = guests.find(g => g.name === guestName);
-      if (currentGuest && currentGuest.confirmed) {
+      let guests = JSON.parse(localStorage.getItem('ezra_grad_history') || '[]');
+      let currentGuest = guests.find(g => g.name === guestName);
+      if (!currentGuest) {
+        currentGuest = { name: guestName, timestamp: Date.now(), confirmed: false };
+        guests.push(currentGuest);
+        localStorage.setItem('ezra_grad_history', JSON.stringify(guests));
+      }
+      if (currentGuest.confirmed) {
         confirmBtn.textContent = '✓ ATTENDANCE CONFIRMED';
         confirmBtn.disabled = true;
       }
